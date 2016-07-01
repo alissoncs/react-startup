@@ -4,7 +4,7 @@ export default class SelfManage extends Component {
 
     render() {
 
-        return <div>Sample</div>
+        return <div>Sample 2</div>
 
     }
 

@@ -3,33 +3,35 @@
 var gulp = require('gulp');
 var gutil = require('gulp-util')
 var sass = require('gulp-sass')
-var webpack = require("webpack")
+var livereload = require('gulp-livereload')
+var webpack = require("webpack-stream")
 var WebpackDevServer = require("webpack-dev-server");
 
-gulp.task('sass', function () {
-  return gulp.src('./assets/sass/**/*.scss')
-    .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest('./dest/css'));
-});
+livereload({ start: true })
 
-// create a single instance of the compiler to allow caching
-var devCompiler = webpack({});
+gulp.task('sass', function () {
+  return gulp.src('./assets/sass/main.scss')
+    .pipe(sass({
+        includePaths: [
+            './node_modules/bootstrap-sass/assets/stylesheets'
+        ]
+    }).on('error', sass.logError))
+    .pipe(gulp.dest('./dest/css'))
+    .pipe(livereload())
+});
 
 gulp.task("webpack", function(callback) {
-	// run webpack
-	devCompiler.run(function(err, stats) {
-		if(err) throw new gutil.PluginError("webpack:build-dev", err);
-		gutil.log("[webpack:build-dev]", stats.toString({
-			colors: true
-		}));
-		callback();
-	});
+    return gulp.src('js/app.js')
+    .pipe(webpack(require('./webpack.config.js')))
+    .pipe(gulp.dest('dest/'))
+    .pipe(livereload())
 });
-
 
 gulp.task('watch', function () {
 
-  gulp.watch('./assets/sass/**/*.scss', ['sass']);
-  gulp.watch('./source/**/*', ['webpack']);
+    livereload.listen()
+    console.log("livereload listening... ")
+    gulp.watch('./assets/sass/**/*.scss', ['sass'])
+    gulp.watch('./js/**/*', ['webpack'])
 
 });
